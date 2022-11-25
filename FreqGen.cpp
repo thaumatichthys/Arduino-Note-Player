@@ -21,28 +21,30 @@ void FreqGen::PlayMidi(uint32_t *src, uint32_t src_len, uint32_t index) {
   this->midi_read_index = index;
   this->midi_src = src;
   this->midi_src_len = src_len;
-  this->midi_prev_ms = 0;
+  this->midi_time_offset = millis();
   this->playing = true;
 }
 
 void FreqGen::StopMidi() {
   this->enabled = false;
   this->playing = false;
+  this->midi_pause_time = millis();
 }
 
 void FreqGen::ResumeMidi() {
   this->enabled = true;
   this->playing = true;
+  this->midi_time_offset += (millis() - this->midi_pause_time);
 }
 
-void FreqGen::UpdateMidi(uint32_t milliseconds) {
+void FreqGen::UpdateMidi() {
   if ((!this->playing) || (this->midi_read_index > this->midi_src_len))
     return;
   uint32_t note_data = pgm_read_dword(&this->midi_src[this->midi_read_index]);
   uint32_t note_time = note_data & 0x00FFFFFF;
   uint8_t note = (note_data >> 24) & 0x7F;
   bool note_action = note_data & 0x80000000;
-  if ((milliseconds >= note_time)) {
+  if (((millis() - this->midi_time_offset) >= note_time)) {
     this->SetMidiNote(note, note_action);
     this->midi_read_index++;
   }

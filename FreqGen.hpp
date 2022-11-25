@@ -13,9 +13,10 @@ class FreqGen {
   volatile bool enabled = false;
 
   uint32_t *midi_src;
-  uint32_t midi_prev_ms = 0;
+  uint32_t midi_time_offset = 0;
   uint32_t midi_src_len; // length as in number of elements, not bytes
   uint32_t midi_read_index = 0;
+  uint32_t midi_pause_time = 0;
   bool playing = false;
 public:
   void Init();
@@ -23,7 +24,7 @@ public:
   void ChangeFreq(uint16_t freq, bool add);
   void SetMidiNote(uint8_t note, bool on);
   void PlayMidi(uint32_t *src, uint32_t src_len, uint32_t index);
-  void UpdateMidi(uint32_t milliseconds);
+  void UpdateMidi();
   void ResumeMidi();
   void StopMidi();
 };
